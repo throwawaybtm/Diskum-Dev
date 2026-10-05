@@ -5,24 +5,18 @@ function doGet() {
       .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
-// Fungsi utama yang dipanggil dari frontend saat tombol "Simpan" ditekan
 function processUpload(formObject) {
   try {
-    // 1. LEMARI ARSIP (Drive): Cari atau buat folder utama dan sub-folder kategori
     var rootFolder = getOrCreateFolder("Awan_Diskum_Arsip");
     var categoryFolder = getOrCreateSubFolder(rootFolder, formObject.kategori);
     
-    // Simpan file PDF ke dalam folder kategori tersebut
     var fileBlob = formObject.file;
     var savedFile = categoryFolder.createFile(fileBlob);
     var fileUrl = savedFile.getUrl();
     
-    // 2. BUKU BESAR (Sheets): Simpan data teks ke Google Sheets
-    // Asumsi: Script ini dibuat menyatu (bound) dengan Google Sheet
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var sheet = getOrCreateDatabaseSheet();
     var timestamp = new Date();
     
-    // Tambahkan baris baru: [Waktu, Nomor Surat, Tanggal, Perihal, Kategori, Link File]
     sheet.appendRow([
       timestamp, 
       formObject.nomor, 
@@ -38,19 +32,44 @@ function processUpload(formObject) {
   }
 }
 
-// Fitur Pencarian & Dasbor
 function getArchiveData() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sheet = getOrCreateDatabaseSheet();
   var data = sheet.getDataRange().getValues();
-  
-  // Hapus baris pertama (header) untuk dikembalikan ke frontend
   if(data.length > 0) {
     data.shift(); 
   }
   return data;
 }
 
-// Fungsi Bantuan (Helpers) untuk Folder Drive
+// ---------------- Helper Functions ----------------
+
+function getOrCreateDatabaseSheet() {
+  var props = PropertiesService.getScriptProperties();
+  var sheetId = props.getProperty('DATABASE_SHEET_ID');
+  
+  if (sheetId) {
+    try {
+      return SpreadsheetApp.openById(sheetId).getActiveSheet();
+    } catch (e) {
+      // If error (e.g. deleted), fall through and create a new one
+    }
+  }
+  
+  // Create new spreadsheet
+  var ss = SpreadsheetApp.create("Buku Besar - Awan Diskum");
+  var sheet = ss.getActiveSheet();
+  
+  // Set headers
+  sheet.appendRow(["Waktu", "Nomor Surat", "Tanggal", "Perihal", "Kategori", "Link File"]);
+  sheet.getRange("A1:F1").setFontWeight("bold");
+  sheet.setFrozenRows(1);
+  
+  // Save ID
+  props.setProperty('DATABASE_SHEET_ID', ss.getId());
+  
+  return sheet;
+}
+
 function getOrCreateFolder(folderName) {
   var folders = DriveApp.getFoldersByName(folderName);
   if (folders.hasNext()) {
