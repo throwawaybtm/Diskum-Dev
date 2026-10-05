@@ -16,3 +16,13 @@ Sebuah portal kerja berbasis web yang mengubah proses pengarsipan manual menjadi
 * **Dasbor Kuantitatif:** Layar depan portal langsung menyajikan angka ringkasan statistik (volume surat masuk vs keluar) sebagai gambaran produktivitas.
 * **Pencarian Instan:** Mesin pencari internal yang menemukan dokumen spesifik dalam hitungan detik, menghilangkan kebutuhan membolak-balik tumpukan kertas.
 * **Ekspor Laporan:** Fitur sekali klik untuk menarik seluruh data persuratan dalam rentang waktu tertentu menjadi laporan siap cetak untuk kebutuhan audit atau rapat.
+
+## Kategori Surat dan Atribut Data
+Terdapat 5 jenis tabel utama:
+1. **Surat Masuk**: Tanggal Terima, Asal Surat, Tanggal Surat, Nomor Surat, Isi Ringkas, Disposisi (Isi, Unit), Tanda Terima, Keterangan
+2. **Surat Keluar**: Asal Surat, Tanggal Surat, Nomor Surat, Isi Ringkas, Tujuan Surat, Pengirim, Penerima, Keterangan
+3. **Surat Tugas**: Asal Surat, Tanggal Surat, Nomor Surat, Isi Ringkas, Tujuan Surat, Pengirim, Penerima, Keterangan
+4. **Surat Khusus**: Asal Surat, Tanggal Surat, Nomor Surat, Isi Ringkas, Tujuan Surat, Pengirim, Penerima, Keterangan
+5. **Surat Keputusan**: Asal Surat, Tanggal Surat, Nomor Surat, Isi Ringkas, Tujuan Surat, Pengirim, Penerima, Keterangan
+
+*(Daftar Instansi Perangkat Daerah, Kecamatan, dan Kelurahan tersedia sebagai referensi dropdown Asal/Tujuan Surat)*

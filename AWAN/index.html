@@ -2,12 +2,12 @@
 <html>
 <head>
   <base target="_top">
-  <!-- Menggunakan Bootstrap untuk tampilan UI yang rapi -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body { background-color: #f8f9fa; }
     .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; }
     .header-title { color: #0d6efd; font-weight: bold; }
+    .dynamic-field { display: none; }
   </style>
 </head>
 <body>
@@ -39,32 +39,90 @@
           <hr>
           <form id="arsipForm" onsubmit="handleFormSubmit(this); return false;">
             <div class="mb-3">
-              <label class="form-label">Nomor Surat</label>
-              <input type="text" class="form-control" name="nomor" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Tanggal Surat</label>
-              <input type="date" class="form-control" name="tanggal" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Perihal</label>
-              <textarea class="form-control" name="perihal" rows="2" required></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Kategori (Laci Digital)</label>
-              <select class="form-select" name="kategori">
+              <label class="form-label">Jenis Naskah (Kategori)</label>
+              <select class="form-select fw-bold text-primary" name="kategori" id="kategoriSelect" onchange="toggleFields()">
                 <option value="Surat Masuk">Surat Masuk</option>
                 <option value="Surat Keluar">Surat Keluar</option>
+                <option value="Surat Tugas">Surat Tugas</option>
+                <option value="Surat Khusus">Surat Khusus</option>
                 <option value="Surat Keputusan">Surat Keputusan</option>
-                <option value="Lainnya">Lainnya</option>
               </select>
             </div>
+
+            <!-- Bagian Umum (Semua Surat) -->
             <div class="mb-3">
-              <label class="form-label">File Surat (PDF)</label>
+              <label class="form-label">Asal Surat</label>
+              <input type="text" class="form-control" name="asalSurat" list="instansiList" placeholder="Pilih atau ketik instansi..." required>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Tanggal Surat</label>
+                <input type="date" class="form-control" name="tanggalSurat" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Nomor Surat</label>
+                <input type="text" class="form-control" name="nomorSurat" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Isi Ringkas (Perihal)</label>
+              <textarea class="form-control" name="perihal" rows="2" required></textarea>
+            </div>
+
+            <!-- Field Khusus: Surat Masuk -->
+            <div class="dynamic-field field-masuk">
+              <div class="mb-3">
+                <label class="form-label">Tanggal Terima Surat</label>
+                <input type="date" class="form-control" name="tanggalTerima" id="tanggalTerima">
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Disposisi (Isi)</label>
+                  <input type="text" class="form-control" name="disposisiIsi">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Disposisi (Unit Pengolah)</label>
+                  <input type="text" class="form-control" name="disposisiUnit">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Tanda Terima</label>
+                <input type="text" class="form-control" name="tandaTerima">
+              </div>
+            </div>
+
+            <!-- Field Khusus: Surat Keluar, Tugas, Khusus, Keputusan -->
+            <div class="dynamic-field field-lain">
+              <div class="mb-3">
+                <label class="form-label">Tujuan Surat</label>
+                <input type="text" class="form-control" name="tujuanSurat" list="instansiList" placeholder="Pilih atau ketik instansi...">
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Pengirim</label>
+                  <input type="text" class="form-control" name="pengirim">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Penerima</label>
+                  <input type="text" class="form-control" name="penerima">
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Keterangan Tambahan</label>
+              <input type="text" class="form-control" name="keterangan">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Scan File (PDF)</label>
               <input type="file" class="form-control" name="file" accept="application/pdf" required>
             </div>
+
             <button type="submit" class="btn btn-primary w-100" id="btnSimpan">Simpan ke Awan</button>
-            <div id="pesanStatus" class="mt-3 text-center"></div>
+            <div id="pesanStatus" class="mt-3 text-center fw-bold"></div>
           </form>
         </div>
       </div>
@@ -81,10 +139,10 @@
             <table class="table table-hover" id="tabelArsip">
               <thead class="table-light">
                 <tr>
-                  <th>Tanggal</th>
+                  <th>Tanggal Entri</th>
+                  <th>Kategori</th>
                   <th>Nomor</th>
                   <th>Perihal</th>
-                  <th>Kategori</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -98,11 +156,47 @@
     </div>
   </div>
 
+  <!-- Datalist untuk Autocomplete Instansi (Perangkat Daerah, Kecamatan, dll) -->
+  <datalist id="instansiList">
+    <option value="Sekretariat Daerah Kota Batam">
+    <option value="Sekretariat DPRD Kota Batam">
+    <option value="Dinas Koperasi dan Usaha Mikro">
+    <option value="Dinas Pendidikan">
+    <option value="Dinas Kesehatan">
+    <option value="Dinas Lingkungan Hidup">
+    <option value="Dinas Perhubungan">
+    <option value="Bapelitbangda">
+    <option value="BPKAD">
+    <option value="Bapenda">
+    <option value="BKPSDM">
+    <option value="Camat Batam Kota">
+    <option value="Camat Batu Aji">
+    <option value="Camat Sekupang">
+    <option value="Kementerian Koperasi dan UKM">
+  </datalist>
+
   <script>
-    // Memuat data saat halaman dibuka
     document.addEventListener("DOMContentLoaded", function() {
+      toggleFields();
       loadData();
     });
+
+    function toggleFields() {
+      let kat = document.getElementById("kategoriSelect").value;
+      let fieldsMasuk = document.querySelectorAll(".field-masuk");
+      let fieldsLain = document.querySelectorAll(".field-lain");
+      
+      if (kat === "Surat Masuk") {
+        fieldsMasuk.forEach(el => el.style.display = "block");
+        fieldsLain.forEach(el => el.style.display = "none");
+        // Required toggle
+        document.getElementById("tanggalTerima").setAttribute("required", "true");
+      } else {
+        fieldsMasuk.forEach(el => el.style.display = "none");
+        fieldsLain.forEach(el => el.style.display = "block");
+        document.getElementById("tanggalTerima").removeAttribute("required");
+      }
+    }
 
     function loadData() {
       google.script.run.withSuccessHandler(tampilkanData).getArchiveData();
@@ -117,15 +211,14 @@
         return;
       }
       
-      // Data format: [Timestamp, Nomor, Tanggal, Perihal, Kategori, Link File]
       data.reverse().forEach(row => {
         let tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${new Date(row[2]).toLocaleDateString()}</td>
-          <td>${row[1]}</td>
-          <td>${row[3]}</td>
-          <td><span class="badge bg-secondary">${row[4]}</span></td>
-          <td><a href="${row[5]}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat PDF</a></td>
+          <td>${new Date(row.tanggal).toLocaleDateString()}</td>
+          <td><span class="badge bg-secondary">${row.kategori}</span></td>
+          <td>${row.nomor}</td>
+          <td>${row.perihal}</td>
+          <td><a href="${row.link}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat</a></td>
         `;
         tbody.appendChild(tr);
       });
@@ -138,17 +231,23 @@
       btn.disabled = true;
       btn.innerHTML = "Memproses...";
       pesan.innerHTML = "";
+      pesan.className = "mt-3 text-center fw-bold";
 
       google.script.run
         .withSuccessHandler(function(response) {
           btn.disabled = false;
           btn.innerHTML = "Simpan ke Awan";
           if(response.success) {
-            pesan.innerHTML = '<span class="text-success">✔ ' + response.message + '</span>';
+            pesan.innerHTML = '✔ ' + response.message;
+            pesan.classList.add("text-success");
+            let savedKategori = formObject.kategori.value; // simpan pilihan
             formObject.reset();
+            formObject.kategori.value = savedKategori; // kembalikan pilihan
+            toggleFields();
             loadData(); // Reload tabel
           } else {
-            pesan.innerHTML = '<span class="text-danger">✖ Gagal: ' + response.error + '</span>';
+            pesan.innerHTML = '✖ Gagal: ' + response.error;
+            pesan.classList.add("text-danger");
           }
         })
         .processUpload(formObject);
