@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <!-- Menggunakan Bootstrap untuk tampilan UI yang rapi -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; }
+    .header-title { color: #0d6efd; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="text-center mb-4">
+      <h1 class="header-title">☁️ Awan Diskum</h1>
+      <p class="text-muted">Portal Arsip Digital Terpusat</p>
+    </div>
+
+    <!-- DASBOR STATISTIK -->
+    <div class="row mb-4 text-center">
+      <div class="col-md-6">
+        <div class="card p-3 bg-primary text-white">
+          <h5 class="mb-0">Pusat Kendali Aktif</h5>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-3 bg-success text-white">
+          <h5 class="mb-0">Lemari Arsip Terhubung</h5>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- FORM PENCATATAN SATU PINTU -->
+      <div class="col-md-5 mb-4">
+        <div class="card p-4">
+          <h4>Catat Surat Baru</h4>
+          <hr>
+          <form id="arsipForm" onsubmit="handleFormSubmit(this); return false;">
+            <div class="mb-3">
+              <label class="form-label">Nomor Surat</label>
+              <input type="text" class="form-control" name="nomor" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tanggal Surat</label>
+              <input type="date" class="form-control" name="tanggal" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Perihal</label>
+              <textarea class="form-control" name="perihal" rows="2" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Kategori (Laci Digital)</label>
+              <select class="form-select" name="kategori">
+                <option value="Surat Masuk">Surat Masuk</option>
+                <option value="Surat Keluar">Surat Keluar</option>
+                <option value="Surat Keputusan">Surat Keputusan</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">File Surat (PDF)</label>
+              <input type="file" class="form-control" name="file" accept="application/pdf" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" id="btnSimpan">Simpan ke Awan</button>
+            <div id="pesanStatus" class="mt-3 text-center"></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- PENCARIAN INSTAN & TABEL DATA -->
+      <div class="col-md-7">
+        <div class="card p-4 h-100">
+          <h4>Temu Kembali (Pencarian)</h4>
+          <hr>
+          <div class="mb-3">
+            <input type="text" id="inputCari" class="form-control" placeholder="Ketik kata kunci perihal atau nomor surat..." onkeyup="filterTabel()">
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover" id="tabelArsip">
+              <thead class="table-light">
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Nomor</th>
+                  <th>Perihal</th>
+                  <th>Kategori</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="badanTabel">
+                <tr><td colspan="5" class="text-center">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Memuat data saat halaman dibuka
+    document.addEventListener("DOMContentLoaded", function() {
+      loadData();
+    });
+
+    function loadData() {
+      google.script.run.withSuccessHandler(tampilkanData).getArchiveData();
+    }
+
+    function tampilkanData(data) {
+      let tbody = document.getElementById("badanTabel");
+      tbody.innerHTML = "";
+      
+      if(data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Belum ada arsip.</td></tr>';
+        return;
+      }
+      
+      // Data format: [Timestamp, Nomor, Tanggal, Perihal, Kategori, Link File]
+      data.reverse().forEach(row => {
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${new Date(row[2]).toLocaleDateString()}</td>
+          <td>${row[1]}</td>
+          <td>${row[3]}</td>
+          <td><span class="badge bg-secondary">${row[4]}</span></td>
+          <td><a href="${row[5]}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat PDF</a></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function handleFormSubmit(formObject) {
+      let btn = document.getElementById("btnSimpan");
+      let pesan = document.getElementById("pesanStatus");
+      
+      btn.disabled = true;
+      btn.innerHTML = "Memproses...";
+      pesan.innerHTML = "";
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          btn.disabled = false;
+          btn.innerHTML = "Simpan ke Awan";
+          if(response.success) {
+            pesan.innerHTML = '<span class="text-success">✔ ' + response.message + '</span>';
+            formObject.reset();
+            loadData(); // Reload tabel
+          } else {
+            pesan.innerHTML = '<span class="text-danger">✖ Gagal: ' + response.error + '</span>';
+          }
+        })
+        .processUpload(formObject);
+    }
+
+    function filterTabel() {
+      let input = document.getElementById("inputCari").value.toLowerCase();
+      let table = document.getElementById("tabelArsip");
+      let tr = table.getElementsByTagName("tr");
+
+      for (let i = 1; i < tr.length; i++) {
+        let textRow = tr[i].textContent.toLowerCase();
+        if (textRow.indexOf(input) > -1) {
+          tr[i].style.display = "";
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+  </script>
+</body>
+</html>
