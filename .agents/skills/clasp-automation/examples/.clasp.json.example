@@ -1,0 +1,17 @@
+{
+  "scriptId": "YOUR_APPS_SCRIPT_ID_HERE",
+  "rootDir": "",
+  "projectId": "your-gcp-project-id-optional",
+  "scriptExtensions": [
+    ".js",
+    ".gs"
+  ],
+  "htmlExtensions": [
+    ".html"
+  ],
+  "jsonExtensions": [
+    ".json"
+  ],
+  "filePushOrder": [],
+  "skipSubdirectories": false
+}

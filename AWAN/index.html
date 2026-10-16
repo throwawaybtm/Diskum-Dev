@@ -1,271 +1,2216 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+  <meta charset="UTF-8">
   <base target="_top">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Awan Diskum - Tracking Persuratan & Disposisi Terpadu</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 & Font Awesome Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <style>
-    body { background-color: #f8f9fa; }
-    .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; }
-    .header-title { color: #0d6efd; font-weight: bold; }
-    .dynamic-field { display: none; }
+    :root {
+      --primary-color: #1e3a8a;       /* Slate Navy */
+      --primary-accent: #2563eb;      /* Vivid Blue */
+      --primary-light: #eff6ff;       /* Soft Blue Tint */
+      --success-color: #059669;       /* Emerald */
+      --success-light: #ecfdf5;
+      --warning-color: #d97706;       /* Amber */
+      --warning-light: #fffbeb;
+      --danger-color: #dc2626;        /* Rose Red */
+      --danger-light: #fef2f2;
+      --purple-color: #7c3aed;
+      --purple-light: #f5f3ff;
+      --teal-color: #0d9488;
+      --teal-light: #f0fdfa;
+      --bg-canvas: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* App Header */
+    .app-header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .brand-logo-badge {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: #ffffff;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      line-height: 1.2;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin: 0;
+      font-weight: 500;
+    }
+
+    /* Connection & Time Status */
+    .status-pill {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #10b981;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse-green 2s infinite;
+    }
+
+    @keyframes pulse-green {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs-custom {
+      border: none;
+      gap: 6px;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .nav-tabs-custom::-webkit-scrollbar { display: none; }
+
+    .nav-tabs-custom .nav-link {
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 10px 18px;
+      border-radius: 9999px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px; /* Accessible touch target */
+    }
+
+    .nav-tabs-custom .nav-link:hover {
+      background-color: #f1f5f9;
+      color: var(--text-main);
+    }
+
+    .nav-tabs-custom .nav-link.active {
+      background-color: var(--primary-accent);
+      color: #ffffff;
+      border-color: var(--primary-accent);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    }
+
+    /* Cards */
+    .dashboard-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-card {
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .kpi-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .kpi-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .kpi-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Specific Category Badges */
+    .badge-masuk { background-color: var(--primary-light); color: var(--primary-accent); border: 1px solid #bfdbfe; }
+    .badge-keluar { background-color: var(--success-light); color: var(--success-color); border: 1px solid #a7f3d0; }
+    .badge-tugas { background-color: var(--warning-light); color: var(--warning-color); border: 1px solid #fde68a; }
+    .badge-sk { background-color: var(--purple-light); color: var(--purple-color); border: 1px solid #ddd6fe; }
+    .badge-khusus { background-color: var(--teal-light); color: var(--teal-color); border: 1px solid #99f6e4; }
+
+    /* Disposition Status Badges */
+    .badge-disposisi-done {
+      background-color: #dcfce7;
+      color: #15803d;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-disposisi-wait {
+      background-color: #fef3c7;
+      color: #b45309;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      animation: alert-glow 2.5s infinite;
+    }
+    @keyframes alert-glow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    /* Filters Bar */
+    .filter-chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .filter-chip {
+      background: #f1f5f9;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 38px;
+    }
+    .filter-chip:hover {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+    .filter-chip.active {
+      background: var(--primary-color);
+      color: #ffffff;
+      border-color: var(--primary-color);
+      box-shadow: 0 2px 6px rgba(30, 58, 138, 0.25);
+    }
+    .filter-chip .chip-count {
+      background: rgba(255,255,255,0.25);
+      border-radius: 9999px;
+      padding: 1px 6px;
+      font-size: 0.72rem;
+    }
+    .filter-chip:not(.active) .chip-count {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+
+    /* Tables */
+    .table-container {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .table-custom {
+      margin-bottom: 0;
+      font-size: 0.88rem;
+    }
+
+    .table-custom thead th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.74rem;
+      letter-spacing: 0.05em;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    .table-custom tbody tr {
+      transition: background-color 0.15s ease;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .table-custom tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .table-custom td {
+      padding: 14px 16px;
+      vertical-align: middle;
+      color: #334155;
+    }
+
+    /* Mobile Cards View */
+    @media (max-width: 768px) {
+      .table-desktop-view {
+        display: none !important;
+      }
+      .mobile-card-view {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .table-desktop-view {
+        display: block !important;
+      }
+      .mobile-card-view {
+        display: none !important;
+      }
+    }
+
+    .mobile-data-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Forms */
+    .form-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-control, .form-select {
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border-color);
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      min-height: 44px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    /* File Drag & Drop Upload Zone */
+    .upload-dropzone {
+      border: 2px dashed #93c5fd;
+      border-radius: var(--radius-md);
+      background-color: #f8fafc;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .upload-dropzone:hover, .upload-dropzone.dragover {
+      background-color: #eff6ff;
+      border-color: var(--primary-accent);
+    }
+    .upload-icon {
+      font-size: 2.2rem;
+      color: var(--primary-accent);
+      margin-bottom: 8px;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(4px);
+    }
+
+    .loading-modal-card {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: var(--radius-lg);
+      text-align: center;
+      max-width: 380px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Print Styling */
+    @media print {
+      .app-header, .nav-tabs-custom, .filter-chip-group, .btn-action-group, #inputCari, .pagination-box {
+        display: none !important;
+      }
+      body {
+        background: #ffffff !important;
+      }
+      .dashboard-card, .table-container {
+        border: none !important;
+        box-shadow: none !important;
+      }
+      .table-desktop-view {
+        display: block !important;
+      }
+      .mobile-card-view {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container mt-5">
-    <div class="text-center mb-4">
-      <h1 class="header-title">☁️ Awan Diskum</h1>
-      <p class="text-muted">Portal Arsip Digital Terpusat</p>
+
+  <!-- LOADING OVERLAY -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-modal-card">
+      <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+      <h5 class="fw-bold mb-1" id="loadingTitle">Memproses Data...</h5>
+      <p class="text-muted small mb-0" id="loadingDesc">Mohon tunggu beberapa saat, sistem sedang berinteraksi dengan Google Sheets dan Drive.</p>
+    </div>
+  </div>
+
+  <!-- APP HEADER -->
+  <header class="app-header py-2 px-3 px-md-4">
+    <div class="container-fluid d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <!-- Brand Logo & Title -->
+      <div class="d-flex align-items-center gap-3">
+        <div class="brand-logo-badge">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+        </div>
+        <div>
+          <h1 class="brand-title">Awan Diskum</h1>
+          <p class="brand-subtitle">Portal Tracking & Disposisi Persuratan &bull; Dinas Koperasi dan Usaha Mikro</p>
+        </div>
+      </div>
+
+      <!-- Live Connectivity & Quick Action -->
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="status-pill" id="sheetsStatusPill" title="Status koneksi Google Spreadsheet">
+          <span class="pulse-dot" id="pulseDot"></span>
+          <span id="syncStatusText">Google Sheets Terhubung</span>
+        </div>
+        <div class="d-none d-md-flex text-muted small fw-semibold align-items-center gap-1 px-2 border-start">
+          <i class="fa-regular fa-clock text-primary"></i>
+          <span id="liveClock">00:00:00 WIB</span>
+        </div>
+        <button class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold" onclick="refreshData()" title="Sinkronkan data terbaru dari Google Sheets">
+          <i class="fa-solid fa-rotate me-1" id="btnRefreshIcon"></i> Sinkron
+        </button>
+        <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm" onclick="switchToTab('tab-entri')">
+          <i class="fa-solid fa-plus me-1"></i> Catat Surat
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="container-fluid px-3 px-md-4 py-3">
+
+    <!-- SUB-NAV TABS -->
+    <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <ul class="nav nav-tabs-custom" id="mainTabNav" role="tablist">
+        <li class="nav-item">
+          <button class="nav-link active" id="btn-tab-dasbor" onclick="switchNavTab('dasbor')">
+            <i class="fa-solid fa-chart-pie"></i> Dasbor & Analitik
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="btn-tab-tracking" onclick="switchNavTab('tracking')">
+            <i class="fa-solid fa-table-list"></i> Buku Register & Tracking
+            <span class="badge bg-light text-primary rounded-pill ms-1" id="tabTotalBadge">0</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="btn-tab-entri" onclick="switchNavTab('entri')">
+            <i class="fa-solid fa-file-pen"></i> Registrasi Surat Baru
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="btn-tab-laporan" onclick="switchNavTab('laporan')">
+            <i class="fa-solid fa-file-lines"></i> Rekap Laporan Bulanan
+          </button>
+        </li>
+      </ul>
+      <div id="demoNotice" class="d-none alert alert-warning py-1 px-3 mb-0 small rounded-pill fw-semibold">
+        <i class="fa-solid fa-circle-info me-1"></i> Mode Simulasi Offline (Standalone)
+      </div>
     </div>
 
-    <!-- DASBOR STATISTIK -->
-    <div class="row mb-4 text-center">
-      <div class="col-md-6">
-        <div class="card p-3 bg-primary text-white">
-          <h5 class="mb-0">Pusat Kendali Aktif</h5>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card p-3 bg-success text-white">
-          <h5 class="mb-0">Lemari Arsip Terhubung</h5>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <!-- FORM PENCATATAN SATU PINTU -->
-      <div class="col-md-5 mb-4">
-        <div class="card p-4">
-          <h4>Catat Surat Baru</h4>
-          <hr>
-          <form id="arsipForm" onsubmit="handleFormSubmit(this); return false;">
-            <div class="mb-3">
-              <label class="form-label">Jenis Naskah (Kategori)</label>
-              <select class="form-select fw-bold text-primary" name="kategori" id="kategoriSelect" onchange="toggleFields()">
-                <option value="Surat Masuk">Surat Masuk</option>
-                <option value="Surat Keluar">Surat Keluar</option>
-                <option value="Surat Tugas">Surat Tugas</option>
-                <option value="Surat Khusus">Surat Khusus</option>
-                <option value="Surat Keputusan">Surat Keputusan</option>
-              </select>
-            </div>
-
-            <!-- Bagian Umum (Semua Surat) -->
-            <div class="mb-3">
-              <label class="form-label">Asal Surat</label>
-              <input type="text" class="form-control" name="asalSurat" list="instansiList" placeholder="Pilih atau ketik instansi..." required>
-            </div>
-            
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Tanggal Surat</label>
-                <input type="date" class="form-control" name="tanggalSurat" required>
+    <!-- ========================================== -->
+    <!-- TAB 1: DASBOR & ANALITIK                   -->
+    <!-- ========================================== -->
+    <section id="panel-dasbor" class="tab-panel-section">
+      <!-- KPI STAT CARDS -->
+      <div class="row g-3 mb-4">
+        <!-- KPI 1: Total Naskah -->
+        <div class="col-6 col-lg-3">
+          <div class="dashboard-card kpi-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <div class="kpi-title">Total Naskah Terdata</div>
+                <div class="kpi-value text-primary" id="kpiTotal">0</div>
               </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Nomor Surat</label>
-                <input type="text" class="form-control" name="nomorSurat" required>
+              <div class="kpi-icon-box bg-primary-subtle text-primary">
+                <i class="fa-solid fa-folder-open"></i>
               </div>
             </div>
-
-            <div class="mb-3">
-              <label class="form-label">Isi Ringkas (Perihal)</label>
-              <textarea class="form-control" name="perihal" rows="2" required></textarea>
+            <div class="kpi-badge bg-light text-muted">
+              <i class="fa-solid fa-database text-primary"></i> 5 Kategori Surat
             </div>
-
-            <!-- Field Khusus: Surat Masuk -->
-            <div class="dynamic-field field-masuk">
-              <div class="mb-3">
-                <label class="form-label">Tanggal Terima Surat</label>
-                <input type="date" class="form-control" name="tanggalTerima" id="tanggalTerima">
-              </div>
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Disposisi (Isi)</label>
-                  <input type="text" class="form-control" name="disposisiIsi">
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Disposisi (Unit Pengolah)</label>
-                  <input type="text" class="form-control" name="disposisiUnit">
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Tanda Terima</label>
-                <input type="text" class="form-control" name="tandaTerima">
-              </div>
-            </div>
-
-            <!-- Field Khusus: Surat Keluar, Tugas, Khusus, Keputusan -->
-            <div class="dynamic-field field-lain">
-              <div class="mb-3">
-                <label class="form-label">Tujuan Surat</label>
-                <input type="text" class="form-control" name="tujuanSurat" list="instansiList" placeholder="Pilih atau ketik instansi...">
-              </div>
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Pengirim</label>
-                  <input type="text" class="form-control" name="pengirim">
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Penerima</label>
-                  <input type="text" class="form-control" name="penerima">
-                </div>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Keterangan Tambahan</label>
-              <input type="text" class="form-control" name="keterangan">
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Scan File (PDF)</label>
-              <input type="file" class="form-control" name="file" accept="application/pdf" required>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100" id="btnSimpan">Simpan ke Awan</button>
-            <div id="pesanStatus" class="mt-3 text-center fw-bold"></div>
-          </form>
-        </div>
-      </div>
-
-      <!-- PENCARIAN INSTAN & TABEL DATA -->
-      <div class="col-md-7">
-        <div class="card p-4 h-100">
-          <h4>Temu Kembali (Pencarian)</h4>
-          <hr>
-          <div class="mb-3">
-            <input type="text" id="inputCari" class="form-control" placeholder="Ketik kata kunci perihal atau nomor surat..." onkeyup="filterTabel()">
           </div>
-          <div class="table-responsive">
-            <table class="table table-hover" id="tabelArsip">
-              <thead class="table-light">
-                <tr>
-                  <th>Tanggal Entri</th>
-                  <th>Kategori</th>
-                  <th>Nomor</th>
-                  <th>Perihal</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="badanTabel">
-                <tr><td colspan="5" class="text-center">Memuat data...</td></tr>
-              </tbody>
-            </table>
+        </div>
+
+        <!-- KPI 2: Surat Masuk & Pending Disposisi -->
+        <div class="col-6 col-lg-3">
+          <div class="dashboard-card kpi-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <div class="kpi-title">Surat Masuk</div>
+                <div class="kpi-value text-primary" id="kpiMasuk">0</div>
+              </div>
+              <div class="kpi-icon-box bg-blue-100 text-primary" style="background:#dbeafe;">
+                <i class="fa-solid fa-inbox"></i>
+              </div>
+            </div>
+            <div id="kpiPendingDisposisiBadge" class="kpi-badge badge-disposisi-wait">
+              <i class="fa-solid fa-clock"></i> <span id="kpiPendingCount">0</span> Perlu Disposisi
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI 3: Surat Keluar & Tugas -->
+        <div class="col-6 col-lg-3">
+          <div class="dashboard-card kpi-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <div class="kpi-title">Surat Keluar & Tugas</div>
+                <div class="kpi-value text-success" id="kpiKeluarTugas">0</div>
+              </div>
+              <div class="kpi-icon-box bg-success-subtle text-success">
+                <i class="fa-solid fa-paper-plane"></i>
+              </div>
+            </div>
+            <div class="kpi-badge bg-light text-muted">
+              <span id="kpiSubKeluar">0 Keluar</span> &bull; <span id="kpiSubTugas">0 Tugas</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI 4: Digitalisasi Berkas Drive -->
+        <div class="col-6 col-lg-3">
+          <div class="dashboard-card kpi-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <div class="kpi-title">Digitalisasi PDF</div>
+                <div class="kpi-value text-teal" style="color: #0d9488;" id="kpiPdfRatio">0%</div>
+              </div>
+              <div class="kpi-icon-box text-teal" style="background: #ccfbf1; color: #0f766e;">
+                <i class="fa-solid fa-file-pdf"></i>
+              </div>
+            </div>
+            <div class="kpi-badge bg-light text-muted">
+              <i class="fa-solid fa-cloud-check text-success"></i> <span id="kpiPdfCount">0</span> berkas tersimpan di Drive
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS & SUMMARY ROW -->
+      <div class="row g-3 mb-4">
+        <!-- Chart 1: Kategori Naskah -->
+        <div class="col-lg-5">
+          <div class="dashboard-card p-3 p-md-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0 fs-6">
+                <i class="fa-solid fa-chart-pie text-primary me-2"></i>Komposisi Kategori Naskah
+              </h5>
+              <span class="badge bg-light text-muted fw-semibold">Buku Register</span>
+            </div>
+            <div style="position: relative; height: 260px; display: flex; align-items: center; justify-content: center;">
+              <canvas id="categoryDonutChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart 2: Status Disposisi & Distribusi Unit -->
+        <div class="col-lg-7">
+          <div class="dashboard-card p-3 p-md-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0 fs-6">
+                <i class="fa-solid fa-chart-column text-primary me-2"></i>Distribusi Naskah & Disposisi per Unit
+              </h5>
+              <span class="badge bg-light text-muted fw-semibold">Unit Pengolah</span>
+            </div>
+            <div style="position: relative; height: 260px;">
+              <canvas id="unitBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT PRIORITY LIST: Surat Perlu Tindak Lanjut Segera -->
+      <div class="dashboard-card p-3 p-md-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div>
+            <h5 class="fw-bold mb-0 fs-6">
+              <i class="fa-solid fa-bell text-warning me-2"></i>Prioritas: Surat Masuk Menunggu Disposisi
+            </h5>
+            <small class="text-muted">Surat masuk yang belum diberikan instruksi disposisi unit pengolah</small>
+          </div>
+          <button class="btn btn-sm btn-outline-primary fw-semibold" onclick="filterByPriorityOnly()">
+            Lihat Semua Antrean Disposisi
+          </button>
+        </div>
+        <div id="urgentDispositionContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: BUKU REGISTER & TRACKING            -->
+    <!-- ========================================== -->
+    <section id="panel-tracking" class="tab-panel-section d-none">
+      <div class="dashboard-card p-3 p-md-4 mb-3">
+        <!-- Search & Quick Filters -->
+        <div class="row g-2 mb-3">
+          <div class="col-md-5">
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0 text-muted">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </span>
+              <input type="text" id="inputCari" class="form-control border-start-0 ps-0" 
+                     placeholder="Cari perihal, nomor surat, asal surat, unit..." onkeyup="handleSearchInput()">
+              <button class="btn btn-outline-secondary border-start-0" type="button" onclick="clearSearch()" title="Hapus pencarian">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <select class="form-select" id="filterStatusSelect" onchange="applyFilters()">
+              <option value="all">Semua Status Disposisi</option>
+              <option value="pending">⚠️ Menunggu Disposisi</option>
+              <option value="done">✅ Selesai Disposisi</option>
+              <option value="has_file">📎 Ada File PDF</option>
+              <option value="no_file">❌ Tanpa File PDF</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-4 d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-secondary fw-semibold btn-sm" onclick="exportToCsv()" title="Unduh data sebagai Excel / CSV">
+              <i class="fa-solid fa-file-csv text-success me-1"></i> Ekspor CSV
+            </button>
+            <button class="btn btn-outline-primary fw-semibold btn-sm" onclick="window.print()" title="Cetak daftar register">
+              <i class="fa-solid fa-print me-1"></i> Cetak
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Filter Chips -->
+        <div class="filter-chip-group" id="categoryChips">
+          <button class="filter-chip active" data-category="ALL" onclick="setCategoryFilter('ALL', this)">
+            Semua Naskah <span class="chip-count" id="chipCountAll">0</span>
+          </button>
+          <button class="filter-chip" data-category="Surat Masuk" onclick="setCategoryFilter('Surat Masuk', this)">
+            <i class="fa-solid fa-inbox text-primary"></i> Surat Masuk <span class="chip-count" id="chipCountMasuk">0</span>
+          </button>
+          <button class="filter-chip" data-category="Surat Keluar" onclick="setCategoryFilter('Surat Keluar', this)">
+            <i class="fa-solid fa-paper-plane text-success"></i> Surat Keluar <span class="chip-count" id="chipCountKeluar">0</span>
+          </button>
+          <button class="filter-chip" data-category="Surat Tugas" onclick="setCategoryFilter('Surat Tugas', this)">
+            <i class="fa-solid fa-briefcase text-warning"></i> Surat Tugas <span class="chip-count" id="chipCountTugas">0</span>
+          </button>
+          <button class="filter-chip" data-category="Surat Keputusan" onclick="setCategoryFilter('Surat Keputusan', this)">
+            <i class="fa-solid fa-stamp text-purple" style="color:#7c3aed;"></i> SK Kadis <span class="chip-count" id="chipCountSK">0</span>
+          </button>
+          <button class="filter-chip" data-category="Surat Khusus" onclick="setCategoryFilter('Surat Khusus', this)">
+            <i class="fa-solid fa-certificate text-teal" style="color:#0d9488;"></i> Surat Khusus <span class="chip-count" id="chipCountKhusus">0</span>
+          </button>
+        </div>
+
+        <!-- Table View for Desktop -->
+        <div class="table-container table-desktop-view">
+          <table class="table table-custom table-hover align-middle" id="mainRegisterTable">
+            <thead>
+              <tr>
+                <th style="width: 140px;">Waktu Entri</th>
+                <th style="width: 130px;">Kategori</th>
+                <th style="width: 180px;">Nomor & Tgl Surat</th>
+                <th>Perihal (Isi Ringkas)</th>
+                <th>Asal / Unit Tujuan</th>
+                <th style="width: 150px;">Status Disposisi</th>
+                <th style="width: 100px;" class="text-center">Berkas PDF</th>
+                <th style="width: 120px;" class="text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyDesktop">
+              <tr>
+                <td colspan="8" class="text-center py-4 text-muted">
+                  <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                  Memuat data dari Google Sheets...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Responsive Card View for Mobile -->
+        <div class="mobile-card-view" id="mobileCardsContainer">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Results Info & Pagination Footer -->
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-2 text-muted small flex-wrap gap-2">
+          <div id="resultsCounter">Menampilkan 0 data</div>
+          <div class="d-flex align-items-center gap-2">
+            <span>Baris per halaman:</span>
+            <select class="form-select form-select-sm" style="width: 80px;" id="pageSizeSelect" onchange="changePageSize()">
+              <option value="15">15</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-secondary" id="btnPrevPage" onclick="prevPage()"><i class="fa-solid fa-chevron-left"></i></button>
+              <button class="btn btn-outline-secondary disabled" id="pageIndicator">1 / 1</button>
+              <button class="btn btn-outline-secondary" id="btnNextPage" onclick="nextPage()"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: REGISTRASI SURAT BARU               -->
+    <!-- ========================================== -->
+    <section id="panel-entri" class="tab-panel-section d-none">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+          <div class="dashboard-card p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+              <div>
+                <h4 class="fw-bold mb-1 fs-5 text-primary">
+                  <i class="fa-solid fa-file-circle-plus me-2"></i>Pencatatan Surat Baru
+                </h4>
+                <p class="text-muted small mb-0">Catat metadata naskah dinas dan arsipkan berkas PDF ke Google Drive terpusat</p>
+              </div>
+              <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill">Satu Pintu</span>
+            </div>
+
+            <form id="formCatatSurat" onsubmit="submitFormEntry(event)">
+              <!-- Pilih Kategori -->
+              <div class="mb-3">
+                <label class="form-label">Jenis Naskah Dinas (Kategori) <span class="text-danger">*</span></label>
+                <select class="form-select fw-bold text-primary" name="kategori" id="formKategoriSelect" onchange="handleFormCategoryChange()" required>
+                  <option value="Surat Masuk">📥 Surat Masuk</option>
+                  <option value="Surat Keluar">📤 Surat Keluar</option>
+                  <option value="Surat Tugas">💼 Surat Tugas</option>
+                  <option value="Surat Keputusan">📜 Surat Keputusan (SK)</option>
+                  <option value="Surat Khusus">🎗️ Surat Khusus</option>
+                </select>
+              </div>
+
+              <!-- Metadata Umum -->
+              <div class="form-section-title">
+                <i class="fa-solid fa-circle-info"></i> Informasi Naskah Dinas
+              </div>
+
+              <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Nomor Surat <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="nomorSurat" placeholder="Contoh: 005/DISKUM/2026" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Tanggal Surat <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" name="tanggalSurat" id="formTanggalSurat" required>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Asal Surat / Pengirim <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="asalSurat" list="instansiList" placeholder="Ketik atau pilih instansi / unit..." required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Isi Ringkas / Perihal Surat <span class="text-danger">*</span></label>
+                <textarea class="form-control" name="perihal" rows="2" placeholder="Tuliskan ringkasan pokok isi surat..." required></textarea>
+              </div>
+
+              <!-- Dynamic Field: Khusus Surat Masuk -->
+              <div id="dynamicMasukGroup">
+                <div class="form-section-title mt-4">
+                  <i class="fa-solid fa-stamp"></i> Penerimaan & Disposisi
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Tanggal Diterima <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" name="tanggalTerima" id="formTanggalTerima">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Tanda Terima / No. Agenda</label>
+                    <input type="text" class="form-control" name="tandaTerima" placeholder="Contoh: AGENDA-089">
+                  </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Unit Pengolah Disposisi</label>
+                    <select class="form-select" name="disposisiUnit" id="formDisposisiUnit">
+                      <option value="">-- Belum Didisposisi --</option>
+                      <option value="Sekretariat">Sekretariat</option>
+                      <option value="Bidang Pemberdayaan Usaha Mikro">Bidang Pemberdayaan Usaha Mikro</option>
+                      <option value="Bidang Kelembagaan dan Pengawasan Koperasi">Bidang Kelembagaan dan Pengawasan Koperasi</option>
+                      <option value="Subbag Perencanaan dan Keuangan">Subbag Perencanaan dan Keuangan</option>
+                      <option value="Subbag Umum dan Kepegawaian">Subbag Umum dan Kepegawaian</option>
+                      <option value="Jabatan Fungsional Pengawas Koperasi">Jabatan Fungsional Pengawas Koperasi</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Petunjuk Disposisi</label>
+                    <input type="text" class="form-control" name="disposisiIsi" placeholder="Contoh: Tindak lanjuti / Pelajari dan siapkan bahan">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dynamic Field: Khusus Surat Keluar, Tugas, SK, Khusus -->
+              <div id="dynamicNonMasukGroup" class="d-none">
+                <div class="form-section-title mt-4">
+                  <i class="fa-solid fa-paper-plane"></i> Distribusi & Penerima
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Tujuan Surat</label>
+                  <input type="text" class="form-control" name="tujuanSurat" list="instansiList" placeholder="Ketik instansi atau pihak tujuan...">
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Penandatangan / Pengirim</label>
+                    <input type="text" class="form-control" name="pengirim" placeholder="Contoh: Kepala Dinas / Sekretaris">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Penerima / Pelaksana Tugas</label>
+                    <input type="text" class="form-control" name="penerima" placeholder="Contoh: Tim Verifikasi / Nama Pegawai">
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Catatan / Keterangan Tambahan</label>
+                <input type="text" class="form-control" name="keterangan" placeholder="Keterangan opsional...">
+              </div>
+
+              <!-- File Upload PDF Area -->
+              <div class="form-section-title mt-4">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Lampiran Berkas Digital (Google Drive)
+              </div>
+              <div class="upload-dropzone mb-3" id="dropzoneBox" onclick="document.getElementById('fileInput').click()">
+                <i class="fa-solid fa-file-pdf upload-icon"></i>
+                <h6 class="fw-bold mb-1">Klik atau Tarik Berkas Scan PDF ke Sini</h6>
+                <p class="text-muted small mb-0">Hanya format PDF (Maksimal 10 MB). Berkas akan disimpan ke folder Drive sesuai kategori.</p>
+                <input type="file" id="fileInput" name="file" accept="application/pdf" class="d-none" onchange="handleFileSelected(this)">
+                <div id="selectedFileInfo" class="mt-2 fw-semibold text-primary d-none"></div>
+              </div>
+
+              <!-- Tombol Simpan -->
+              <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm" id="btnSubmitForm">
+                  <i class="fa-solid fa-floppy-disk me-2"></i> Simpan ke Google Sheets & Drive
+                </button>
+              </div>
+              <div id="formFeedbackAlert" class="mt-3 text-center fw-bold"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: REKAP LAPORAN BULANAN (AUDIT)       -->
+    <!-- ========================================== -->
+    <section id="panel-laporan" class="tab-panel-section d-none">
+      <div class="dashboard-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 border-bottom pb-3">
+          <div>
+            <h4 class="fw-bold mb-1 fs-5 text-primary">
+              <i class="fa-solid fa-file-lines me-2"></i>Generator Laporan Persuratan Bulanan
+            </h4>
+            <p class="text-muted small mb-0">Format standar rekapitulasi data naskah dinas, distribusi unit, dan kepatuhan arsip</p>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm fw-semibold" onclick="copyReportText()">
+              <i class="fa-regular fa-copy me-1"></i> Salin Teks
+            </button>
+            <button class="btn btn-primary btn-sm fw-semibold" onclick="window.print()">
+              <i class="fa-solid fa-print me-1"></i> Cetak Laporan
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Laporan -->
+        <div class="row g-2 mb-4 p-3 bg-light rounded-3">
+          <div class="col-md-4">
+            <label class="form-label small">Kategori Naskah</label>
+            <select class="form-select form-select-sm" id="reportKategoriSelect" onchange="generateReport()">
+              <option value="Surat Masuk">Surat Masuk</option>
+              <option value="Surat Keluar">Surat Keluar</option>
+              <option value="Surat Tugas">Surat Tugas</option>
+              <option value="Surat Keputusan">Surat Keputusan (SK)</option>
+              <option value="Surat Khusus">Surat Khusus</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small">Periode Bulan</label>
+            <select class="form-select form-select-sm" id="reportBulanSelect" onchange="generateReport()">
+              <option value="ALL">Semua Periode (Sepanjang Waktu)</option>
+              <option value="01">Januari</option>
+              <option value="02">Februari</option>
+              <option value="03">Maret</option>
+              <option value="04">April</option>
+              <option value="05">Mei</option>
+              <option value="06">Juni</option>
+              <option value="07">Juli</option>
+              <option value="08">Agustus</option>
+              <option value="09">September</option>
+              <option value="10" selected>Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small">Tahun</label>
+            <select class="form-select form-select-sm" id="reportTahunSelect" onchange="generateReport()">
+              <option value="2026" selected>2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Official Report Preview Box -->
+        <div class="p-4 bg-white border rounded-3 shadow-sm" id="reportContentArea" style="line-height: 1.8;">
+          <!-- Generated automatically -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: DETAIL DOKUMEN                      -->
+  <!-- ========================================== -->
+  <div class="modal fade" id="modalDetailDokumen" tabindex="-1" aria-labelledby="modalDetailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: var(--radius-lg);">
+        <div class="modal-header border-bottom px-4 py-3 bg-light">
+          <div>
+            <span class="badge mb-1" id="modalCategoryBadge">Surat Masuk</span>
+            <h5 class="modal-title fw-bold text-primary" id="modalDetailLabel">Detail Naskah Dinas</h5>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body p-4" id="modalDetailBody">
+          <!-- Dynamic detail content -->
+        </div>
+        <div class="modal-footer border-top px-4 py-3 bg-light d-flex justify-content-between">
+          <button type="button" class="btn btn-secondary fw-semibold btn-sm" data-bs-dismiss="modal">Tutup</button>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-warning text-dark fw-bold btn-sm" id="modalBtnDisposisi">
+              <i class="fa-solid fa-stamp me-1"></i> Disposisi
+            </button>
+            <a href="#" target="_blank" class="btn btn-primary fw-bold btn-sm" id="modalBtnPdf">
+              <i class="fa-solid fa-file-pdf me-1"></i> Buka File PDF
+            </a>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Datalist untuk Autocomplete Instansi (Perangkat Daerah, Kecamatan, dll) -->
+  <!-- ========================================== -->
+  <!-- MODAL: UPDATE DISPOSISI                    -->
+  <!-- ========================================== -->
+  <div class="modal fade" id="modalUpdateDisposisi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: var(--radius-lg);">
+        <div class="modal-header border-bottom px-4 py-3 bg-light">
+          <h5 class="modal-title fw-bold text-primary">
+            <i class="fa-solid fa-stamp me-2"></i>Tindak Lanjut Disposisi
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="small text-muted mb-3" id="disposisiModalSubtitle">Berikan disposisi untuk surat nomor: -</p>
+          <div class="mb-3">
+            <label class="form-label">Tujuan Unit Pengolah <span class="text-danger">*</span></label>
+            <select class="form-select" id="quickDisposisiUnit" required>
+              <option value="Sekretariat">Sekretariat</option>
+              <option value="Bidang Pemberdayaan Usaha Mikro">Bidang Pemberdayaan Usaha Mikro</option>
+              <option value="Bidang Kelembagaan dan Pengawasan Koperasi">Bidang Kelembagaan dan Pengawasan Koperasi</option>
+              <option value="Subbag Perencanaan dan Keuangan">Subbag Perencanaan dan Keuangan</option>
+              <option value="Subbag Umum dan Kepegawaian">Subbag Umum dan Kepegawaian</option>
+              <option value="Jabatan Fungsional Pengawas Koperasi">Jabatan Fungsional Pengawas Koperasi</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Instruksi / Petunjuk Disposisi <span class="text-danger">*</span></label>
+            <textarea class="form-control" id="quickDisposisiIsi" rows="3" placeholder="Contoh: Pelajari dan koordinasikan dengan instansi terkait..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-top px-4 py-3 bg-light">
+          <button type="button" class="btn btn-secondary btn-sm fw-semibold" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="saveQuickDisposisi()">
+            <i class="fa-solid fa-check me-1"></i> Simpan Disposisi ke Sheets
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTOCOMPLETE DATALIST: INSTANSI BATAM -->
   <datalist id="instansiList">
     <option value="Sekretariat Daerah Kota Batam">
+    <option value="Dinas Koperasi dan Usaha Mikro Kota Batam">
     <option value="Sekretariat DPRD Kota Batam">
-    <option value="Dinas Koperasi dan Usaha Mikro">
-    <option value="Dinas Pendidikan">
-    <option value="Dinas Kesehatan">
+    <option value="Badan Perencanaan dan Penelitian Pengembangan Pembangunan Daerah (Bapelitbangda)">
+    <option value="Badan Pengelolaan Keuangan dan Aset Daerah (BPKAD)">
+    <option value="Badan Pendapatan Daerah (Bapenda)">
+    <option value="Badan Kepegawaian dan Pengembangan SDM (BKPSDM)">
+    <option value="Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu (DPM-PTSP)">
+    <option value="Dinas Perindustrian dan Perdagangan">
+    <option value="Dinas Tenaga Kerja">
+    <option value="Dinas Komunikasi dan Informatika">
     <option value="Dinas Lingkungan Hidup">
     <option value="Dinas Perhubungan">
-    <option value="Bapelitbangda">
-    <option value="BPKAD">
-    <option value="Bapenda">
-    <option value="BKPSDM">
-    <option value="Camat Batam Kota">
-    <option value="Camat Batu Aji">
-    <option value="Camat Sekupang">
-    <option value="Kementerian Koperasi dan UKM">
+    <option value="Dinas Pendidikan">
+    <option value="Dinas Kesehatan">
+    <option value="Dinas Ketahanan Pangan dan Pertanian">
+    <option value="Dinas Perikanan">
+    <option value="Inspektorat Daerah Kota Batam">
+    <option value="Satuan Polisi Pamong Praja">
+    <option value="Kecamatan Batam Kota">
+    <option value="Kecamatan Batu Aji">
+    <option value="Kecamatan Sekupang">
+    <option value="Kecamatan Lubuk Baja">
+    <option value="Kecamatan Bengkong">
+    <option value="Kecamatan Nongsa">
+    <option value="Kecamatan Sagulung">
+    <option value="Kementerian Koperasi dan UKM RI">
+    <option value="Kementerian Hukum dan HAM RI">
+    <option value="Pemerintah Provinsi Kepulauan Riau">
   </datalist>
 
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
   <script>
+    // State Management
+    let rawArchiveData = [];
+    let filteredData = [];
+    let currentCategoryFilter = "ALL";
+    let currentStatusFilter = "all";
+    let searchQuery = "";
+    let currentPage = 1;
+    let pageSize = 15;
+    let categoryDonutChartInstance = null;
+    let unitBarChartInstance = null;
+    let activeDisposisiNomor = null;
+    let activeDisposisiKategori = "Surat Masuk";
+
+    // Standalone Simulation Fallback Dataset (Batam Dinas Koperasi & Usaha Mikro)
+    const mockDataFallback = [
+      {
+        id: "Surat Masuk_2",
+        rowIndex: 2,
+        tanggal: "2026-10-15 09:20:00",
+        waktuEntri: "15/10/2026 09.20.00",
+        kategori: "Surat Masuk",
+        nomor: "005/SETDA/X/2026",
+        nomorSurat: "005/SETDA/X/2026",
+        perihal: "Undangan Rapat Koordinasi Pemberdayaan UMKM Sentra Industri",
+        asalSurat: "Sekretariat Daerah Kota Batam",
+        tujuanSurat: "Dinas Koperasi dan Usaha Mikro",
+        tanggalSurat: "14/10/2026",
+        tanggalTerima: "15/10/2026",
+        disposisiIsi: "Hadiri dan siapkan data binaan koperasi mikro",
+        disposisiUnit: "Bidang Pemberdayaan Usaha Mikro",
+        statusDisposisi: "Sudah Disposisi",
+        tandaTerima: "AGD-102",
+        pengirim: "Sekretariat Daerah Kota Batam",
+        penerima: "Bidang Pemberdayaan Usaha Mikro",
+        keterangan: "Pakaian batik lengan panjang",
+        link: "https://drive.google.com/file/d/sample1/view",
+        hasFile: true
+      },
+      {
+        id: "Surat Masuk_3",
+        rowIndex: 3,
+        tanggal: "2026-10-14 14:15:00",
+        waktuEntri: "14/10/2026 14.15.00",
+        kategori: "Surat Masuk",
+        nomor: "421/BAPEDA/2026",
+        nomorSurat: "421/BAPEDA/2026",
+        perihal: "Permohonan Data Realisasi KUR Daerah Triwulan III",
+        asalSurat: "Badan Pendapatan Daerah (Bapenda)",
+        tujuanSurat: "Dinas Koperasi dan Usaha Mikro",
+        tanggalSurat: "13/10/2026",
+        tanggalTerima: "14/10/2026",
+        disposisiIsi: "",
+        disposisiUnit: "",
+        statusDisposisi: "Belum Disposisi",
+        tandaTerima: "AGD-101",
+        pengirim: "Badan Pendapatan Daerah (Bapenda)",
+        penerima: "Kepala Dinas",
+        keterangan: "Sifat Segera",
+        link: "",
+        hasFile: false
+      },
+      {
+        id: "Surat Keluar_2",
+        rowIndex: 2,
+        tanggal: "2026-10-13 11:00:00",
+        waktuEntri: "13/10/2026 11.00.00",
+        kategori: "Surat Keluar",
+        nomor: "518/DISKUM/SEKR/X/2026",
+        nomorSurat: "518/DISKUM/SEKR/X/2026",
+        perihal: "Penyampaian Laporan Bulanan Realisasi Program Inkubasi Wirausaha",
+        asalSurat: "Dinas Koperasi dan Usaha Mikro Kota Batam",
+        tujuanSurat: "Sekretariat Daerah Kota Batam",
+        tanggalSurat: "13/10/2026",
+        tanggalTerima: "-",
+        disposisiIsi: "-",
+        disposisiUnit: "-",
+        statusDisposisi: "Tidak Berlaku",
+        tandaTerima: "-",
+        pengirim: "Kepala Dinas",
+        penerima: "Sekretaris Daerah Kota Batam",
+        keterangan: "Tembusan Bapelitbangda",
+        link: "https://drive.google.com/file/d/sample2/view",
+        hasFile: true
+      },
+      {
+        id: "Surat Tugas_2",
+        rowIndex: 2,
+        tanggal: "2026-10-12 08:30:00",
+        waktuEntri: "12/10/2026 08.30.00",
+        kategori: "Surat Tugas",
+        nomor: "094/ST-DISKUM/X/2026",
+        nomorSurat: "094/ST-DISKUM/X/2026",
+        perihal: "Monitoring dan Evaluasi Koperasi Sehat Kecamatan Sekupang",
+        asalSurat: "Dinas Koperasi dan Usaha Mikro Kota Batam",
+        tujuanSurat: "Kecamatan Sekupang",
+        tanggalSurat: "12/10/2026",
+        tanggalTerima: "-",
+        disposisiIsi: "-",
+        disposisiUnit: "-",
+        statusDisposisi: "Tidak Berlaku",
+        tandaTerima: "-",
+        pengirim: "Kepala Dinas",
+        penerima: "Tim Pengawas Koperasi",
+        keterangan: "Selama 3 hari kerja",
+        link: "https://drive.google.com/file/d/sample3/view",
+        hasFile: true
+      },
+      {
+        id: "Surat Keputusan_2",
+        rowIndex: 2,
+        tanggal: "2026-10-10 10:00:00",
+        waktuEntri: "10/10/2026 10.00.00",
+        kategori: "Surat Keputusan",
+        nomor: "KPTS.12/DISKUM/X/2026",
+        nomorSurat: "KPTS.12/DISKUM/X/2026",
+        perihal: "Penetapan Penerima Bantuan Sarana Prasarana Usaha Mikro Mandiri Tahun 2026",
+        asalSurat: "Dinas Koperasi dan Usaha Mikro Kota Batam",
+        tujuanSurat: "Kelompok Pelaku Usaha Mikro Binaan",
+        tanggalSurat: "10/10/2026",
+        tanggalTerima: "-",
+        disposisiIsi: "-",
+        disposisiUnit: "-",
+        statusDisposisi: "Tidak Berlaku",
+        tandaTerima: "-",
+        pengirim: "Kepala Dinas",
+        penerima: "Pelaku Usaha Terdaftar",
+        keterangan: "Lampiran SK 40 Pelaku Usaha",
+        link: "https://drive.google.com/file/d/sample4/view",
+        hasFile: true
+      },
+      {
+        id: "Surat Khusus_2",
+        rowIndex: 2,
+        tanggal: "2026-10-08 13:45:00",
+        waktuEntri: "08/10/2026 13.45.00",
+        kategori: "Surat Khusus",
+        nomor: "518.2/SKH-DISKUM/2026",
+        nomorSurat: "518.2/SKH-DISKUM/2026",
+        perihal: "Surat Keterangan Hasil Penilaian Kesehatan Koperasi KSP Sejahtera Batam",
+        asalSurat: "Dinas Koperasi dan Usaha Mikro Kota Batam",
+        tujuanSurat: "KSP Sejahtera Batam",
+        tanggalSurat: "08/10/2026",
+        tanggalTerima: "-",
+        disposisiIsi: "-",
+        disposisiUnit: "-",
+        statusDisposisi: "Tidak Berlaku",
+        tandaTerima: "-",
+        pengirim: "Kepala Bidang Kelembagaan",
+        penerima: "Pengurus KSP Sejahtera",
+        keterangan: "Predikat: Cukup Sehat",
+        link: "https://drive.google.com/file/d/sample5/view",
+        hasFile: true
+      }
+    ];
+
+    // Initialization
     document.addEventListener("DOMContentLoaded", function() {
-      toggleFields();
+      initClock();
+      setDefaultDates();
+      checkEnvironment();
       loadData();
     });
 
-    function toggleFields() {
-      let kat = document.getElementById("kategoriSelect").value;
-      let fieldsMasuk = document.querySelectorAll(".field-masuk");
-      let fieldsLain = document.querySelectorAll(".field-lain");
+    // Check if running inside Google Apps Script or standalone
+    function checkEnvironment() {
+      const isGAS = typeof google !== "undefined" && google.script && google.script.run;
+      const demoNotice = document.getElementById("demoNotice");
+      const syncStatusText = document.getElementById("syncStatusText");
       
-      if (kat === "Surat Masuk") {
-        fieldsMasuk.forEach(el => el.style.display = "block");
-        fieldsLain.forEach(el => el.style.display = "none");
-        // Required toggle
-        document.getElementById("tanggalTerima").setAttribute("required", "true");
+      if (!isGAS) {
+        demoNotice.classList.remove("d-none");
+        syncStatusText.textContent = "Google Sheets (Mode Demo Offline)";
       } else {
-        fieldsMasuk.forEach(el => el.style.display = "none");
-        fieldsLain.forEach(el => el.style.display = "block");
-        document.getElementById("tanggalTerima").removeAttribute("required");
+        demoNotice.classList.add("d-none");
+        syncStatusText.textContent = "Google Sheets Terhubung";
       }
     }
 
-    function loadData() {
-      google.script.run.withSuccessHandler(tampilkanData).getArchiveData();
+    // Live Clock Display
+    function initClock() {
+      function update() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " WIB";
+        document.getElementById("liveClock").textContent = timeStr;
+      }
+      update();
+      setInterval(update, 1000);
     }
 
-    function tampilkanData(data) {
-      let tbody = document.getElementById("badanTabel");
-      tbody.innerHTML = "";
+    function setDefaultDates() {
+      const today = new Date().toISOString().split("T")[0];
+      const tglSurat = document.getElementById("formTanggalSurat");
+      const tglTerima = document.getElementById("formTanggalTerima");
+      if (tglSurat) tglSurat.value = today;
+      if (tglTerima) tglTerima.value = today;
+    }
+
+    // Load Data from Google Apps Script Backend or Demo Fallback
+    function loadData() {
+      showLoading(true, "Memuat Data Persuratan...", "Mengambil catatan buku register dari Google Sheets...");
+      const isGAS = typeof google !== "undefined" && google.script && google.script.run;
+
+      if (isGAS) {
+        google.script.run
+          .withSuccessHandler(handleDataReceived)
+          .withFailureHandler(handleDataError)
+          .getArchiveData();
+      } else {
+        // Standalone fallback
+        setTimeout(function() {
+          handleDataReceived(mockDataFallback);
+        }, 500);
+      }
+    }
+
+    function refreshData() {
+      const icon = document.getElementById("btnRefreshIcon");
+      if (icon) icon.classList.add("fa-spin");
+      loadData();
+    }
+
+    function handleDataReceived(data) {
+      const icon = document.getElementById("btnRefreshIcon");
+      if (icon) icon.classList.remove("fa-spin");
+      showLoading(false);
+
+      rawArchiveData = Array.isArray(data) ? data : [];
+      updateKPIs(rawArchiveData);
+      renderCharts(rawArchiveData);
+      renderUrgentDispositions(rawArchiveData);
+      applyFilters();
+      generateReport();
+    }
+
+    function handleDataError(err) {
+      showLoading(false);
+      const icon = document.getElementById("btnRefreshIcon");
+      if (icon) icon.classList.remove("fa-spin");
+      alert("Gagal memuat data dari Google Sheets: " + (err.message || err));
+    }
+
+    // Update KPI Counters
+    function updateKPIs(data) {
+      const total = data.length;
+      const masuk = data.filter(d => d.kategori === "Surat Masuk");
+      const keluar = data.filter(d => d.kategori === "Surat Keluar");
+      const tugas = data.filter(d => d.kategori === "Surat Tugas");
+      const sk = data.filter(d => d.kategori === "Surat Keputusan");
+      const khusus = data.filter(d => d.kategori === "Surat Khusus");
       
-      if(data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Belum ada arsip.</td></tr>';
+      const pendingDisposisi = masuk.filter(d => !d.disposisiUnit || d.disposisiUnit === "" || d.statusDisposisi === "Belum Disposisi").length;
+      const withPdf = data.filter(d => d.hasFile || (d.link && d.link.length > 5)).length;
+      const pdfPercent = total > 0 ? Math.round((withPdf / total) * 100) : 0;
+
+      // Update Header Badges & Cards
+      document.getElementById("kpiTotal").textContent = total;
+      document.getElementById("tabTotalBadge").textContent = total;
+      document.getElementById("kpiMasuk").textContent = masuk.length;
+      document.getElementById("kpiKeluarTugas").textContent = keluar.length + tugas.length;
+      document.getElementById("kpiSubKeluar").textContent = keluar.length + " Keluar";
+      document.getElementById("kpiSubTugas").textContent = tugas.length + " Tugas";
+      document.getElementById("kpiPdfRatio").textContent = pdfPercent + "%";
+      document.getElementById("kpiPdfCount").textContent = withPdf;
+      document.getElementById("kpiPendingCount").textContent = pendingDisposisi;
+
+      // Update Filter Chip Counts
+      document.getElementById("chipCountAll").textContent = total;
+      document.getElementById("chipCountMasuk").textContent = masuk.length;
+      document.getElementById("chipCountKeluar").textContent = keluar.length;
+      document.getElementById("chipCountTugas").textContent = tugas.length;
+      document.getElementById("chipCountSK").textContent = sk.length;
+      document.getElementById("chipCountKhusus").textContent = khusus.length;
+    }
+
+    // Render Priority Urgent Dispositions
+    function renderUrgentDispositions(data) {
+      const container = document.getElementById("urgentDispositionContainer");
+      if (!container) return;
+
+      const urgentList = data.filter(d => d.kategori === "Surat Masuk" && (!d.disposisiUnit || d.statusDisposisi === "Belum Disposisi"));
+
+      if (urgentList.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-4 bg-light rounded-3 text-muted">
+            <i class="fa-solid fa-circle-check text-success fs-3 mb-2"></i>
+            <h6 class="fw-bold mb-0">Semua Surat Masuk Sudah Didisposisikan</h6>
+            <small>Tidak ada surat masuk yang tertahan di antrean pimpinan.</small>
+          </div>
+        `;
         return;
       }
-      
-      data.reverse().forEach(row => {
-        let tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${new Date(row.tanggal).toLocaleDateString()}</td>
-          <td><span class="badge bg-secondary">${row.kategori}</span></td>
-          <td>${row.nomor}</td>
-          <td>${row.perihal}</td>
-          <td><a href="${row.link}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat</a></td>
+
+      let html = `<div class="list-group list-group-flush border rounded-3 overflow-hidden">`;
+      urgentList.slice(0, 5).forEach(item => {
+        html += `
+          <div class="list-group-item p-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge badge-disposisi-wait"><i class="fa-solid fa-clock"></i> Belum Disposisi</span>
+                <span class="fw-bold text-dark">${item.nomor}</span>
+                <small class="text-muted">&bull; ${item.tanggalTerima}</small>
+              </div>
+              <div class="fw-semibold text-primary mb-1">${escapeHtml(item.perihal)}</div>
+              <small class="text-muted">Dari: <strong>${escapeHtml(item.asalSurat)}</strong></small>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-secondary" onclick="viewDocumentDetail('${item.id}')">Detail</button>
+              <button class="btn btn-sm btn-warning text-dark fw-bold" onclick="openQuickDisposisiModal('${item.nomor}', '${item.kategori}')">
+                <i class="fa-solid fa-stamp me-1"></i> Disposisi Sekarang
+              </button>
+            </div>
+          </div>
         `;
-        tbody.appendChild(tr);
+      });
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    // Render Charts with Chart.js
+    function renderCharts(data) {
+      const masuk = data.filter(d => d.kategori === "Surat Masuk").length;
+      const keluar = data.filter(d => d.kategori === "Surat Keluar").length;
+      const tugas = data.filter(d => d.kategori === "Surat Tugas").length;
+      const sk = data.filter(d => d.kategori === "Surat Keputusan").length;
+      const khusus = data.filter(d => d.kategori === "Surat Khusus").length;
+
+      // Donut Chart: Komposisi Kategori
+      const donutCtx = document.getElementById("categoryDonutChart");
+      if (donutCtx) {
+        if (categoryDonutChartInstance) categoryDonutChartInstance.destroy();
+        categoryDonutChartInstance = new Chart(donutCtx, {
+          type: "doughnut",
+          data: {
+            labels: ["Surat Masuk", "Surat Keluar", "Surat Tugas", "SK Kadis", "Surat Khusus"],
+            datasets: [{
+              data: [masuk, keluar, tugas, sk, khusus],
+              backgroundColor: ["#2563eb", "#059669", "#d97706", "#7c3aed", "#0d9488"],
+              borderWidth: 2,
+              borderColor: "#ffffff"
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: "bottom", labels: { boxWidth: 12, font: { family: "Plus Jakarta Sans", size: 11 } } },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const val = context.raw || 0;
+                    const total = masuk + keluar + tugas + sk + khusus;
+                    const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                    return ` ${context.label}: ${val} berkas (${pct}%)`;
+                  }
+                }
+              }
+            },
+            cutout: "65%"
+          }
+        });
+      }
+
+      // Bar Chart: Distribusi Unit Pengolah
+      const unitCounts = {
+        "Sekretariat": 0,
+        "Bidang Usaha Mikro": 0,
+        "Bidang Koperasi": 0,
+        "Perencanaan & Keuangan": 0,
+        "Umum & Kepegawaian": 0,
+        "Lainnya": 0
+      };
+
+      data.forEach(d => {
+        const u = d.disposisiUnit || d.asalSurat || "";
+        if (u.includes("Sekretariat")) unitCounts["Sekretariat"]++;
+        else if (u.includes("Mikro")) unitCounts["Bidang Usaha Mikro"]++;
+        else if (u.includes("Koperasi")) unitCounts["Bidang Koperasi"]++;
+        else if (u.includes("Perencanaan") || u.includes("Keuangan")) unitCounts["Perencanaan & Keuangan"]++;
+        else if (u.includes("Umum") || u.includes("Kepegawaian")) unitCounts["Umum & Kepegawaian"]++;
+        else unitCounts["Lainnya"]++;
+      });
+
+      const barCtx = document.getElementById("unitBarChart");
+      if (barCtx) {
+        if (unitBarChartInstance) unitBarChartInstance.destroy();
+        unitBarChartInstance = new Chart(barCtx, {
+          type: "bar",
+          data: {
+            labels: Object.keys(unitCounts),
+            datasets: [{
+              label: "Volume Dokumen",
+              data: Object.values(unitCounts),
+              backgroundColor: "#3b82f6",
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { family: "Plus Jakarta Sans", size: 10 } } },
+              y: { beginAtZero: true, grid: { color: "#f1f5f9" }, ticks: { stepSize: 1, font: { family: "Plus Jakarta Sans", size: 10 } } }
+            }
+          }
+        });
+      }
+    }
+
+    // Filtering, Search, and Pagination Logic
+    function handleSearchInput() {
+      searchQuery = document.getElementById("inputCari").value.trim().toLowerCase();
+      currentPage = 1;
+      applyFilters();
+    }
+
+    function clearSearch() {
+      document.getElementById("inputCari").value = "";
+      searchQuery = "";
+      currentPage = 1;
+      applyFilters();
+    }
+
+    function setCategoryFilter(category, btnElement) {
+      currentCategoryFilter = category;
+      currentPage = 1;
+      
+      const chips = document.querySelectorAll(".filter-chip");
+      chips.forEach(c => c.classList.remove("active"));
+      if (btnElement) btnElement.classList.add("active");
+
+      applyFilters();
+    }
+
+    function filterByPriorityOnly() {
+      switchNavTab("tracking");
+      setCategoryFilter("Surat Masuk", document.querySelector('[data-category="Surat Masuk"]'));
+      document.getElementById("filterStatusSelect").value = "pending";
+      currentStatusFilter = "pending";
+      applyFilters();
+    }
+
+    function applyFilters() {
+      currentStatusFilter = document.getElementById("filterStatusSelect").value;
+      
+      filteredData = rawArchiveData.filter(item => {
+        // Category check
+        if (currentCategoryFilter !== "ALL" && item.kategori !== currentCategoryFilter) {
+          return false;
+        }
+
+        // Status filter check
+        if (currentStatusFilter === "pending") {
+          if (item.kategori !== "Surat Masuk" || (item.disposisiUnit && item.disposisiUnit !== "")) return false;
+        } else if (currentStatusFilter === "done") {
+          if (item.kategori !== "Surat Masuk" || !item.disposisiUnit || item.disposisiUnit === "") return false;
+        } else if (currentStatusFilter === "has_file") {
+          if (!item.hasFile && (!item.link || item.link.length <= 5)) return false;
+        } else if (currentStatusFilter === "no_file") {
+          if (item.hasFile || (item.link && item.link.length > 5)) return false;
+        }
+
+        // Search Query check
+        if (searchQuery) {
+          const matchTarget = [
+            item.nomor,
+            item.perihal,
+            item.asalSurat,
+            item.tujuanSurat,
+            item.disposisiUnit,
+            item.disposisiIsi,
+            item.keterangan
+          ].join(" ").toLowerCase();
+
+          if (!matchTarget.includes(searchQuery)) return false;
+        }
+
+        return true;
+      });
+
+      renderTable();
+    }
+
+    // Render Table and Mobile Cards
+    function renderTable() {
+      const tbody = document.getElementById("tableBodyDesktop");
+      const mobileContainer = document.getElementById("mobileCardsContainer");
+      const resultsCounter = document.getElementById("resultsCounter");
+      const pageIndicator = document.getElementById("pageIndicator");
+
+      const totalItems = filteredData.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const startIndex = (currentPage - 1) * pageSize;
+      const pageData = filteredData.slice(startIndex, startIndex + pageSize);
+
+      resultsCounter.textContent = `Menampilkan ${totalItems === 0 ? 0 : startIndex + 1} - ${Math.min(startIndex + pageSize, totalItems)} dari ${totalItems} arsip`;
+      pageIndicator.textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById("btnPrevPage").disabled = currentPage <= 1;
+      document.getElementById("btnNextPage").disabled = currentPage >= totalPages;
+
+      if (totalItems === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-5 text-muted">
+              <i class="fa-regular fa-folder-open fs-2 mb-2"></i>
+              <div class="fw-semibold">Tidak ada arsip yang cocok dengan filter atau kata kunci.</div>
+            </td>
+          </tr>
+        `;
+        mobileContainer.innerHTML = `
+          <div class="text-center py-5 text-muted bg-white rounded-3 border">
+            <i class="fa-regular fa-folder-open fs-2 mb-2"></i>
+            <div class="fw-semibold">Tidak ada data ditemukan.</div>
+          </div>
+        `;
+        return;
+      }
+
+      // Render Desktop Rows
+      let desktopHtml = "";
+      let mobileHtml = "";
+
+      pageData.forEach(row => {
+        const catBadgeClass = getCategoryBadgeClass(row.kategori);
+        const hasPdf = row.hasFile || (row.link && row.link.length > 5);
+        
+        let disposisiBadge = "";
+        if (row.kategori === "Surat Masuk") {
+          if (row.disposisiUnit && row.disposisiUnit.trim() !== "") {
+            disposisiBadge = `<span class="badge-disposisi-done"><i class="fa-solid fa-check"></i> ${escapeHtml(row.disposisiUnit)}</span>`;
+          } else {
+            disposisiBadge = `<span class="badge-disposisi-wait"><i class="fa-solid fa-clock"></i> Belum Disposisi</span>`;
+          }
+        } else {
+          disposisiBadge = `<span class="text-muted small">-</span>`;
+        }
+
+        const pdfBtn = hasPdf 
+          ? `<a href="${row.link}" target="_blank" class="btn btn-sm btn-outline-danger" title="Buka PDF"><i class="fa-solid fa-file-pdf"></i></a>`
+          : `<span class="badge bg-light text-muted" title="Tidak ada file PDF">-</span>`;
+
+        desktopHtml += `
+          <tr>
+            <td class="small text-muted">${row.waktuEntri || row.tanggal || "-"}</td>
+            <td><span class="badge ${catBadgeClass}">${row.kategori}</span></td>
+            <td>
+              <div class="fw-bold text-dark">${escapeHtml(row.nomor)}</div>
+              <small class="text-muted">${row.tanggalSurat}</small>
+            </td>
+            <td>
+              <div class="fw-semibold text-primary" style="max-width: 320px; white-space: normal;">${escapeHtml(row.perihal)}</div>
+              ${row.keterangan && row.keterangan !== "-" ? `<small class="text-muted d-block text-truncate" style="max-width: 300px;">Ket: ${escapeHtml(row.keterangan)}</small>` : ""}
+            </td>
+            <td>
+              <div class="small fw-semibold text-dark">${escapeHtml(row.asalSurat || "-")}</div>
+              ${row.tujuanSurat && row.tujuanSurat !== "-" ? `<small class="text-muted">Tujuan: ${escapeHtml(row.tujuanSurat)}</small>` : ""}
+            </td>
+            <td>${disposisiBadge}</td>
+            <td class="text-center">${pdfBtn}</td>
+            <td class="text-center">
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-secondary" onclick="viewDocumentDetail('${row.id}')" title="Lihat Rincian">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                ${row.kategori === "Surat Masuk" ? `
+                  <button class="btn btn-outline-warning text-dark" onclick="openQuickDisposisiModal('${row.nomor}', '${row.kategori}')" title="Disposisi">
+                    <i class="fa-solid fa-stamp"></i>
+                  </button>
+                ` : ""}
+              </div>
+            </td>
+          </tr>
+        `;
+
+        // Render Mobile Card
+        mobileHtml += `
+          <div class="mobile-data-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge ${catBadgeClass}">${row.kategori}</span>
+              <small class="text-muted">${row.waktuEntri || row.tanggal || "-"}</small>
+            </div>
+            <h6 class="fw-bold mb-1 text-dark">${escapeHtml(row.nomor)}</h6>
+            <p class="text-primary fw-semibold mb-2" style="font-size: 0.9rem;">${escapeHtml(row.perihal)}</p>
+            <div class="small text-muted mb-2">
+              <div><strong>Asal:</strong> ${escapeHtml(row.asalSurat)}</div>
+              ${row.tujuanSurat && row.tujuanSurat !== "-" ? `<div><strong>Tujuan:</strong> ${escapeHtml(row.tujuanSurat)}</div>` : ""}
+            </div>
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+              <div>${disposisiBadge}</div>
+              <div class="d-flex gap-2">
+                ${hasPdf ? `<a href="${row.link}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-file-pdf me-1"></i> PDF</a>` : ""}
+                <button class="btn btn-sm btn-primary" onclick="viewDocumentDetail('${row.id}')">Rincian</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      tbody.innerHTML = desktopHtml;
+      mobileContainer.innerHTML = mobileHtml;
+    }
+
+    function changePageSize() {
+      pageSize = parseInt(document.getElementById("pageSizeSelect").value, 10);
+      currentPage = 1;
+      renderTable();
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    }
+
+    function nextPage() {
+      const totalPages = Math.ceil(filteredData.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+      }
+    }
+
+    // Modal View Detail
+    function viewDocumentDetail(id) {
+      const item = rawArchiveData.find(d => d.id === id);
+      if (!item) return;
+
+      const badge = document.getElementById("modalCategoryBadge");
+      badge.textContent = item.kategori;
+      badge.className = "badge mb-1 " + getCategoryBadgeClass(item.kategori);
+
+      let bodyHtml = `
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">NOMOR SURAT</label>
+            <div class="fw-bold fs-6 text-dark">${escapeHtml(item.nomor)}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">TANGGAL SURAT</label>
+            <div class="fw-semibold text-dark">${item.tanggalSurat || "-"}</div>
+          </div>
+          <div class="col-12">
+            <label class="text-muted small fw-bold">ISI RINGKAS (PERIHAL)</label>
+            <div class="p-3 bg-light rounded-3 fw-semibold text-primary" style="line-height: 1.6;">${escapeHtml(item.perihal)}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">ASAL SURAT / PENGIRIM</label>
+            <div class="fw-semibold text-dark">${escapeHtml(item.asalSurat || item.pengirim || "-")}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">TUJUAN / PENERIMA</label>
+            <div class="fw-semibold text-dark">${escapeHtml(item.tujuanSurat || item.penerima || "-")}</div>
+          </div>
+      `;
+
+      if (item.kategori === "Surat Masuk") {
+        bodyHtml += `
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">TANGGAL TERIMA</label>
+            <div class="fw-semibold text-dark">${item.tanggalTerima || "-"}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">TANDA TERIMA / AGENDA</label>
+            <div class="fw-semibold text-dark">${escapeHtml(item.tandaTerima || "-")}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">STATUS DISPOSISI</label>
+            <div>${item.disposisiUnit ? `<span class="badge-disposisi-done"><i class="fa-solid fa-check"></i> Sudah ke: ${escapeHtml(item.disposisiUnit)}</span>` : `<span class="badge-disposisi-wait"><i class="fa-solid fa-clock"></i> Belum Didisposisi</span>`}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">PETUNJUK DISPOSISI</label>
+            <div class="fw-semibold text-dark">${escapeHtml(item.disposisiIsi || "-")}</div>
+          </div>
+        `;
+      }
+
+      bodyHtml += `
+          <div class="col-12">
+            <label class="text-muted small fw-bold">KETERANGAN</label>
+            <div class="text-dark">${escapeHtml(item.keterangan || "-")}</div>
+          </div>
+          <div class="col-12">
+            <label class="text-muted small fw-bold">WAKTU ENTRI SISTEM</label>
+            <div class="small text-muted">${item.waktuEntri || item.tanggal || "-"}</div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("modalDetailBody").innerHTML = bodyHtml;
+
+      // PDF button configuration
+      const btnPdf = document.getElementById("modalBtnPdf");
+      if (item.hasFile || (item.link && item.link.length > 5)) {
+        btnPdf.href = item.link;
+        btnPdf.classList.remove("d-none");
+      } else {
+        btnPdf.classList.add("d-none");
+      }
+
+      // Disposisi button configuration
+      const btnDisp = document.getElementById("modalBtnDisposisi");
+      if (item.kategori === "Surat Masuk") {
+        btnDisp.classList.remove("d-none");
+        btnDisp.onclick = function() {
+          const detailModal = bootstrap.Modal.getInstance(document.getElementById("modalDetailDokumen"));
+          if (detailModal) detailModal.hide();
+          openQuickDisposisiModal(item.nomor, item.kategori, item.disposisiUnit, item.disposisiIsi);
+        };
+      } else {
+        btnDisp.classList.add("d-none");
+      }
+
+      const modal = new bootstrap.Modal(document.getElementById("modalDetailDokumen"));
+      modal.show();
+    }
+
+    // Quick Disposition Modal
+    function openQuickDisposisiModal(nomor, kategori, currentUnit = "", currentIsi = "") {
+      activeDisposisiNomor = nomor;
+      activeDisposisiKategori = kategori;
+
+      document.getElementById("disposisiModalSubtitle").textContent = `Berikan instruksi disposisi untuk naskah surat: ${nomor}`;
+      document.getElementById("quickDisposisiUnit").value = currentUnit || "Sekretariat";
+      document.getElementById("quickDisposisiIsi").value = currentIsi || "";
+
+      const modal = new bootstrap.Modal(document.getElementById("modalUpdateDisposisi"));
+      modal.show();
+    }
+
+    function saveQuickDisposisi() {
+      const unit = document.getElementById("quickDisposisiUnit").value;
+      const isi = document.getElementById("quickDisposisiIsi").value.trim();
+
+      if (!isi) {
+        alert("Harap isikan petunjuk / instruksi disposisi!");
+        return;
+      }
+
+      const modalEl = document.getElementById("modalUpdateDisposisi");
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+
+      showLoading(true, "Menyimpan Disposisi...", "Memperbarui kolom disposisi di Google Sheets...");
+
+      const isGAS = typeof google !== "undefined" && google.script && google.script.run;
+      if (isGAS) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            showLoading(false);
+            if (res.success) {
+              alert(res.message);
+              loadData();
+            } else {
+              alert("Gagal memperbarui disposisi: " + res.error);
+            }
+          })
+          .withFailureHandler(function(err) {
+            showLoading(false);
+            alert("Terjadi kesalahan jaringan: " + err);
+          })
+          .updateDisposisi(activeDisposisiKategori, activeDisposisiNomor, unit, isi);
+      } else {
+        // Offline demo update
+        setTimeout(function() {
+          showLoading(false);
+          const found = rawArchiveData.find(d => d.nomor === activeDisposisiNomor);
+          if (found) {
+            found.disposisiUnit = unit;
+            found.disposisiIsi = isi;
+            found.statusDisposisi = "Sudah Disposisi";
+          }
+          alert("Disposisi berhasil diperbarui (Simulasi Demo)!");
+          handleDataReceived(rawArchiveData);
+        }, 500);
+      }
+    }
+
+    // Dynamic Form Handlers (Pencatatan Surat)
+    function handleFormCategoryChange() {
+      const kat = document.getElementById("formKategoriSelect").value;
+      const masukGroup = document.getElementById("dynamicMasukGroup");
+      const nonMasukGroup = document.getElementById("dynamicNonMasukGroup");
+      const tglTerima = document.getElementById("formTanggalTerima");
+
+      if (kat === "Surat Masuk") {
+        masukGroup.classList.remove("d-none");
+        nonMasukGroup.classList.add("d-none");
+        if (tglTerima) tglTerima.setAttribute("required", "true");
+      } else {
+        masukGroup.classList.add("d-none");
+        nonMasukGroup.classList.remove("d-none");
+        if (tglTerima) tglTerima.removeAttribute("required");
+      }
+    }
+
+    function handleFileSelected(input) {
+      const fileInfo = document.getElementById("selectedFileInfo");
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.type !== "application/pdf") {
+          alert("Hanya berkas berformat PDF yang diperbolehkan!");
+          input.value = "";
+          fileInfo.classList.add("d-none");
+          return;
+        }
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        fileInfo.innerHTML = `<i class="fa-solid fa-circle-check text-success me-1"></i> Terpilih: <strong>${escapeHtml(file.name)}</strong> (${sizeMb} MB)`;
+        fileInfo.classList.remove("d-none");
+      } else {
+        fileInfo.classList.add("d-none");
+      }
+    }
+
+    function submitFormEntry(e) {
+      e.preventDefault();
+      const form = document.getElementById("formCatatSurat");
+      const btn = document.getElementById("btnSubmitForm");
+      const alertBox = document.getElementById("formFeedbackAlert");
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i> Mengunggah ke Google Sheets & Drive...`;
+      alertBox.textContent = "";
+
+      const isGAS = typeof google !== "undefined" && google.script && google.script.run;
+      if (isGAS) {
+        google.script.run
+          .withSuccessHandler(function(response) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-2"></i> Simpan ke Google Sheets & Drive`;
+
+            if (response.success) {
+              alertBox.className = "mt-3 alert alert-success fw-bold";
+              alertBox.innerHTML = `✔ ${response.message}`;
+              form.reset();
+              setDefaultDates();
+              handleFormCategoryChange();
+              document.getElementById("selectedFileInfo").classList.add("d-none");
+              loadData(); // Reload table
+            } else {
+              alertBox.className = "mt-3 alert alert-danger fw-bold";
+              alertBox.innerHTML = `✖ Gagal: ${response.error}`;
+            }
+          })
+          .withFailureHandler(function(err) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-2"></i> Simpan ke Google Sheets & Drive`;
+            alertBox.className = "mt-3 alert alert-danger fw-bold";
+            alertBox.innerHTML = `✖ Kesalahan: ${err.message || err}`;
+          })
+          .processUpload(form);
+      } else {
+        // Offline demo submission
+        setTimeout(function() {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-2"></i> Simpan ke Google Sheets & Drive`;
+          alertBox.className = "mt-3 alert alert-success fw-bold";
+          alertBox.innerHTML = `✔ Berhasil disimpan (Simulasi Mode Demo)! Data langsung ditambahkan ke tabel.`;
+          
+          const formData = new FormData(form);
+          const newDoc = {
+            id: formData.get("kategori") + "_" + (rawArchiveData.length + 1),
+            rowIndex: rawArchiveData.length + 1,
+            tanggal: new Date().toISOString().replace("T", " ").substring(0, 19),
+            waktuEntri: new Date().toLocaleString("id-ID"),
+            kategori: formData.get("kategori"),
+            nomor: formData.get("nomorSurat") || "001/DEMO/2026",
+            nomorSurat: formData.get("nomorSurat") || "001/DEMO/2026",
+            perihal: formData.get("perihal") || "Perihal baru",
+            asalSurat: formData.get("asalSurat") || "Dinas Koperasi dan Usaha Mikro",
+            tujuanSurat: formData.get("tujuanSurat") || "Pihak Tujuan",
+            tanggalSurat: formData.get("tanggalSurat") || "2026-10-16",
+            tanggalTerima: formData.get("tanggalTerima") || "-",
+            disposisiIsi: formData.get("disposisiIsi") || "",
+            disposisiUnit: formData.get("disposisiUnit") || "",
+            statusDisposisi: formData.get("kategori") === "Surat Masuk" ? (formData.get("disposisiUnit") ? "Sudah Disposisi" : "Belum Disposisi") : "Tidak Berlaku",
+            tandaTerima: formData.get("tandaTerima") || "-",
+            pengirim: formData.get("pengirim") || formData.get("asalSurat") || "-",
+            penerima: formData.get("penerima") || "-",
+            keterangan: formData.get("keterangan") || "-",
+            link: "https://drive.google.com/demo",
+            hasFile: true
+          };
+          rawArchiveData.unshift(newDoc);
+          handleDataReceived(rawArchiveData);
+          form.reset();
+          setDefaultDates();
+          handleFormCategoryChange();
+          document.getElementById("selectedFileInfo").classList.add("d-none");
+        }, 800);
+      }
+    }
+
+    // Monthly Report Generator (conforming to laporan_templates.md)
+    function generateReport() {
+      const kategori = document.getElementById("reportKategoriSelect").value;
+      const bulan = document.getElementById("reportBulanSelect").value;
+      const tahun = document.getElementById("reportTahunSelect").value;
+      const container = document.getElementById("reportContentArea");
+
+      // Filter by category and optionally by month/year
+      let docs = rawArchiveData.filter(d => d.kategori === kategori);
+      if (bulan !== "ALL") {
+        docs = docs.filter(d => {
+          const tgl = d.tanggalSurat || d.waktuEntri || "";
+          return tgl.includes("/" + bulan + "/") || tgl.includes("-" + bulan + "-");
+        });
+      }
+
+      const count = docs.length;
+      const withPdfCount = docs.filter(d => d.hasFile || (d.link && d.link.length > 5)).length;
+      const pdfPercent = count > 0 ? Math.round((withPdfCount / count) * 100) : 0;
+
+      // Group by Asal Surat / Unit Pengolah
+      const originCounts = {};
+      docs.forEach(d => {
+        const origin = d.asalSurat || d.pengirim || "Tidak Diketahui";
+        originCounts[origin] = (originCounts[origin] || 0) + 1;
+      });
+      const sortedOrigins = Object.entries(originCounts).sort((a,b) => b[1] - a[1]);
+      const topOrigin = sortedOrigins.length > 0 ? `${sortedOrigins[0][0]} (${sortedOrigins[0][1]} dokumen)` : "Belum ada data";
+
+      // Disposisi count for Surat Masuk
+      const disposedCount = docs.filter(d => d.disposisiUnit && d.disposisiUnit.trim() !== "").length;
+      const pendingDisposedCount = count - disposedCount;
+
+      const bulanNames = {
+        "ALL": "TAHUN " + tahun,
+        "01": "JANUARI " + tahun, "02": "FEBRUARI " + tahun, "03": "MARET " + tahun,
+        "04": "APRIL " + tahun, "05": "MEI " + tahun, "06": "JUNI " + tahun,
+        "07": "JULI " + tahun, "08": "AGUSTUS " + tahun, "09": "SEPTEMBER " + tahun,
+        "10": "OKTOBER " + tahun, "11": "NOVEMBER " + tahun, "12": "DESEMBER " + tahun
+      };
+      const periodeText = bulanNames[bulan] || ("PERIODE TAHUN " + tahun);
+
+      let reportHtml = `
+        <div class="text-center mb-4">
+          <h5 class="fw-bold text-uppercase mb-1">LAPORAN TENTANG ${kategori.toUpperCase()}</h5>
+          <h6 class="fw-bold text-muted mb-0">DINAS KOPERASI DAN USAHA MIKRO KOTA BATAM</h6>
+          <div class="badge bg-primary-subtle text-primary fw-bold mt-1">${periodeText}</div>
+          <hr class="mt-3">
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold text-primary">A. PENDAHULUAN</h6>
+          <p class="mb-2"><strong>1. Umum / Latar Belakang:</strong> Laporan ini memuat rekapitulasi data pada register <em>${kategori}</em> Dinas Koperasi dan Usaha Mikro Kota Batam. Berdasarkan rekapitulasi pada sistem terpusat Awan Diskum, terdapat total <strong>${count} naskah dinas</strong> teragendakan secara digital.</p>
+          <p class="mb-0"><strong>2. Maksud dan Tujuan:</strong> Memetakan distribusi penerbitan naskah naskah dinas, memantau tingkat kelengkapan arsip digital (Google Drive), serta memastikan akuntabilitas administrasi kearsipan pemerintah daerah.</p>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold text-primary">B. KEGIATAN YANG DILAKSANAKAN</h6>
+          <p class="mb-0">Melakukan verifikasi, klasifikasi nomor register, pemantauan status disposisi, dan integrasi pindaian berkas fisik ke dalam brankas digital kearsipan.</p>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold text-primary">C. HASIL YANG DICAPAI</h6>
+          <div class="row g-2 mb-3">
+            <div class="col-md-4">
+              <div class="p-3 bg-light rounded-3 border">
+                <small class="text-muted fw-bold d-block">TOTAL NASKAH</small>
+                <div class="fs-4 fw-bold text-dark">${count} Dokumen</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 bg-light rounded-3 border">
+                <small class="text-muted fw-bold d-block">KELENGKAPAN PDF</small>
+                <div class="fs-4 fw-bold text-success">${pdfPercent}% (${withPdfCount}/${count})</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 bg-light rounded-3 border">
+                <small class="text-muted fw-bold d-block">${kategori === "Surat Masuk" ? "STATUS DISPOSISI" : "ASAL TERBANYAK"}</small>
+                <div class="fs-6 fw-bold text-primary mt-1">
+                  ${kategori === "Surat Masuk" ? `${disposedCount} Selesai, ${pendingDisposedCount} Menunggu` : topOrigin}
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="small text-muted mb-0"><strong>Distribusi Asal Surat / Unit:</strong></p>
+          <ul class="small mb-0">
+            ${sortedOrigins.slice(0, 5).map(o => `<li>${escapeHtml(o[0])}: <strong>${o[1]} dokumen</strong></li>`).join("") || "<li>Belum ada data distribusi.</li>"}
+          </ul>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold text-primary">D. KESIMPULAN DAN SARAN</h6>
+          <p class="mb-1"><strong>Kesimpulan:</strong> Pelaksanaan tata kelola naskah <em>${kategori}</em> telah berjalan terstruktur dengan tingkat digitalisasi berkas mencapai <strong>${pdfPercent}%</strong>.</p>
+          <p class="mb-0"><strong>Saran:</strong> Disarankan bagi unit pengolah untuk terus memutakhirkan berkas fisik scan PDF dan menyelesaikan disposisi surat masuk secara tepat waktu.</p>
+        </div>
+
+        <div class="mt-5 text-end pe-4">
+          <p class="mb-1 text-muted small">Batam, ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</p>
+          <p class="fw-bold mb-4">Kepala Dinas Koperasi dan Usaha Mikro Kota Batam</p>
+          <div style="height: 40px;"></div>
+          <p class="fw-bold text-decoration-underline mb-0">H. Hendri Arulan, S.Pd</p>
+          <p class="small text-muted mb-0">Pembina Utama Muda / NIP. 197205121998031005</p>
+        </div>
+      `;
+
+      container.innerHTML = reportHtml;
+    }
+
+    function copyReportText() {
+      const container = document.getElementById("reportContentArea");
+      const text = container.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Teks laporan resmi berhasil disalin ke clipboard!");
+      }).catch(() => {
+        alert("Gagal menyalin teks.");
       });
     }
 
-    function handleFormSubmit(formObject) {
-      let btn = document.getElementById("btnSimpan");
-      let pesan = document.getElementById("pesanStatus");
-      
-      btn.disabled = true;
-      btn.innerHTML = "Memproses...";
-      pesan.innerHTML = "";
-      pesan.className = "mt-3 text-center fw-bold";
+    // Export Table Data to CSV
+    function exportToCsv() {
+      if (filteredData.length === 0) {
+        alert("Tidak ada data untuk diekspor!");
+        return;
+      }
 
-      google.script.run
-        .withSuccessHandler(function(response) {
-          btn.disabled = false;
-          btn.innerHTML = "Simpan ke Awan";
-          if(response.success) {
-            pesan.innerHTML = '✔ ' + response.message;
-            pesan.classList.add("text-success");
-            let savedKategori = formObject.kategori.value; // simpan pilihan
-            formObject.reset();
-            formObject.kategori.value = savedKategori; // kembalikan pilihan
-            toggleFields();
-            loadData(); // Reload tabel
-          } else {
-            pesan.innerHTML = '✖ Gagal: ' + response.error;
-            pesan.classList.add("text-danger");
-          }
-        })
-        .processUpload(formObject);
+      const headers = ["Waktu Entri", "Kategori", "Nomor Surat", "Tanggal Surat", "Perihal", "Asal Surat", "Tujuan Surat", "Unit Disposisi", "Instruksi Disposisi", "Tanda Terima", "Keterangan", "Link Berkas"];
+      const rows = filteredData.map(d => [
+        `"${(d.waktuEntri || d.tanggal || "").replace(/"/g, '""')}"`,
+        `"${(d.kategori || "").replace(/"/g, '""')}"`,
+        `"${(d.nomor || "").replace(/"/g, '""')}"`,
+        `"${(d.tanggalSurat || "").replace(/"/g, '""')}"`,
+        `"${(d.perihal || "").replace(/"/g, '""')}"`,
+        `"${(d.asalSurat || "").replace(/"/g, '""')}"`,
+        `"${(d.tujuanSurat || "").replace(/"/g, '""')}"`,
+        `"${(d.disposisiUnit || "").replace(/"/g, '""')}"`,
+        `"${(d.disposisiIsi || "").replace(/"/g, '""')}"`,
+        `"${(d.tandaTerima || "").replace(/"/g, '""')}"`,
+        `"${(d.keterangan || "").replace(/"/g, '""')}"`,
+        `"${(d.link || "").replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\r\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Register_Persuratan_AwanDiskum_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
-    function filterTabel() {
-      let input = document.getElementById("inputCari").value.toLowerCase();
-      let table = document.getElementById("tabelArsip");
-      let tr = table.getElementsByTagName("tr");
+    // Navigation Switcher
+    function switchNavTab(tabName) {
+      document.querySelectorAll(".tab-panel-section").forEach(p => p.classList.add("d-none"));
+      document.querySelectorAll(".nav-tabs-custom .nav-link").forEach(l => l.classList.remove("active"));
 
-      for (let i = 1; i < tr.length; i++) {
-        let textRow = tr[i].textContent.toLowerCase();
-        if (textRow.indexOf(input) > -1) {
-          tr[i].style.display = "";
-        } else {
-          tr[i].style.display = "none";
-        }
+      const targetPanel = document.getElementById("panel-" + tabName);
+      const targetBtn = document.getElementById("btn-tab-" + tabName);
+
+      if (targetPanel) targetPanel.classList.remove("d-none");
+      if (targetBtn) targetBtn.classList.add("active");
+
+      if (tabName === "dasbor") {
+        renderCharts(rawArchiveData);
       }
+    }
+
+    function switchToTab(tabId) {
+      if (tabId === "tab-entri") switchNavTab("entri");
+      else if (tabId === "tab-tracking") switchNavTab("tracking");
+    }
+
+    // Helper functions
+    function showLoading(show, title, desc) {
+      const overlay = document.getElementById("loadingOverlay");
+      if (!overlay) return;
+      if (show) {
+        if (title) document.getElementById("loadingTitle").textContent = title;
+        if (desc) document.getElementById("loadingDesc").textContent = desc;
+        overlay.style.display = "flex";
+      } else {
+        overlay.style.display = "none";
+      }
+    }
+
+    function getCategoryBadgeClass(category) {
+      switch (category) {
+        case "Surat Masuk": return "badge-masuk";
+        case "Surat Keluar": return "badge-keluar";
+        case "Surat Tugas": return "badge-tugas";
+        case "Surat Keputusan": return "badge-sk";
+        case "Surat Khusus": return "badge-khusus";
+        default: return "bg-secondary text-white";
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return "";
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
   </script>
 </body>
